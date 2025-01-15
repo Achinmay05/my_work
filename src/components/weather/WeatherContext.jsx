@@ -10,26 +10,6 @@ import Vl from '../../assets/vl.png';
 import V from '../../assets/v.png';
 import T from '../../assets/t.png';
 
-const LocationDialog = ({ onAllow }) => {
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-gray-900 p-6 rounded-lg max-w-md w-full mx-4">
-                <h2 className="text-xl font-bold text-white mb-4">Location Access Required</h2>
-                <p className="text-gray-300 mb-6">
-                    This weather app needs access to your location to provide accurate weather information.
-                    Please enable location access to continue.
-                </p>
-                <button
-                    onClick={onAllow}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 cursor-pointer"
-                >
-                    Enable Location Access
-                </button>
-            </div>
-        </div>
-    );
-};
-
 export default function WeatherContext() {
     const [city, setCity] = useState("");
     const [locationPermission, setLocationPermission] = useState("prompt");
@@ -74,28 +54,12 @@ export default function WeatherContext() {
         ]
     });
 
-    const API_KEY = '3dbf77ba1fd74bdaa3037b6136a645dc'; // Replace with your actual OpenWeather API key
+    const API_KEY = 'my_api'; // Replace with your actual OpenWeather API key
 
     const day = new Date().getDate();
     const month = new Date().getMonth() + 1;
     const year = new Date().getFullYear();
     const aqi = ["Good", "Fair", "Moderate", "Poor", "Very Poor"];
-
-    useEffect(() => {
-        // Check for location permission when component mounts
-        if (navigator.permissions && navigator.permissions.query) {
-            navigator.permissions.query({ name: 'geolocation' })
-                .then(permissionStatus => {
-                    setLocationPermission(permissionStatus.state);
-                    if (permissionStatus.state === 'prompt') {
-                        setShowLocationDialog(true);
-                    }
-                });
-        } else {
-            // Fallback for browsers that don't support permissions API
-            setShowLocationDialog(true);
-        }
-    }, []);
 
     const handleInputChange = (event) => {
         setCity(event.target.value);
@@ -181,7 +145,7 @@ export default function WeatherContext() {
             ]);
 
             setLocationPermission("granted");
-            setShowLocationDialog(false);
+
 
         } catch (error) {
             console.error("Geolocation error:", error);
@@ -214,10 +178,6 @@ export default function WeatherContext() {
         }
     };
 
-    const requestLocationPermission = () => {
-        getCurrentLocation();
-    };
-
     const throughCity = async () => {
         if (!city.trim()) {
             alert("Please enter a city name");
@@ -242,9 +202,7 @@ export default function WeatherContext() {
         return new Date(data * 1000);
     };
 
-    if (showLocationDialog) {
-        return <LocationDialog onAllow={requestLocationPermission} />;
-    }
+   
 
     return (
         <div className='w-full h-[98%] overflow-y-auto flex flex-col sm:flex-row text-white'>
@@ -273,7 +231,7 @@ export default function WeatherContext() {
                         <h2 className="text-white absolute mt-12 pointer-events-none">
                             {weather?.main?.temp
                                 ? `${(weather.main.temp - 273.15).toFixed(2)}°C`
-                                : "Weather data unavailable"}
+                                : "No data"}
                         </h2>
                         {weather?.weather?.[0]?.icon && (
                             <img
