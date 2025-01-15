@@ -54,7 +54,7 @@ export default function WeatherContext() {
         ]
     });
 
-    const API_KEY = 'my_api'; // Replace with your actual OpenWeather API key
+    const API_KEY = '3dbf77ba1fd74bdaa3037b6136a645dc'; // Replace with your actual OpenWeather API key
 
     const day = new Date().getDate();
     const month = new Date().getMonth() + 1;
@@ -178,6 +178,10 @@ export default function WeatherContext() {
         }
     };
 
+    const requestLocationPermission = () => {
+        getCurrentLocation();
+    };
+
     const throughCity = async () => {
         if (!city.trim()) {
             alert("Please enter a city name");
@@ -241,7 +245,7 @@ export default function WeatherContext() {
                             />
                         )}
                         <img src={Cal} className="mt-28 absolute w-[5%] pointer-events-none" alt="" />
-                        <div className='text-white text-sm mt-[140px] ml-7'>{weather?.name || "City name unavailable"} <br /> {data?.state || "State not available"}   {data.country}</div>
+                        <div className='text-white text-sm mt-[140px] ml-7'>{weather?.name || "City name unavailable"} <br /> {data?.state || "State not available"}   {data?.country || "NOA"}</div>
                         <div className='text-white text-sm mt-[-67px] ml-7'>{day} / {month} / {year}</div>
                         <div className='text-white text-xl mt-[20px] sm:ml-64 ml-56'>{weather.weather[0].main}</div>
                         <img src={Loc} className="mt-36 absolute w-[5%] pointer-events-none" alt="" />

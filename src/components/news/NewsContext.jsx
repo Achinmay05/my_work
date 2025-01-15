@@ -16,17 +16,25 @@ export default function NewsContext() {
     const updateNews = async (currentPage) => {
         try {
             setLoading(true);
-            const url = `https://newsapi.org/v2/top-headlines?country=us&category=${category}&apiKey=7436ea363aec4b00874f9d95c8bd9c17&page=${currentPage}&pageSize=12`;
+            const url = `https://newsapi.org/v2/top-headlines?country=us&category=${category}&apiKey=74a99a9ac7ff4f32bc3d488dc58fad27&page=${currentPage}&pageSize=12`;
             const data = await fetch(url);
             const parsedData = await data.json();
-            setArticles(parsedData.articles);
-            setTotalResults(parsedData.totalResults);
+
+            if (parsedData.articles) {
+                setArticles(parsedData.articles); // Update only if articles exist
+                setTotalResults(parsedData.totalResults || 0); // Use default if undefined
+            } else {
+                setArticles([]); // Fallback to empty array
+            }
+
             setLoading(false);
         } catch (error) {
             console.error("Error fetching news:", error);
+            setArticles([]); // Ensure articles is never undefined
             setLoading(false);
         }
-    }
+    };
+
 
     useEffect(() => {
         document.title = `${capitalizeFirstLetter(category)} - NewsMonkey`;
@@ -100,23 +108,28 @@ export default function NewsContext() {
                         </div>
                     ) : (
                         <>
-                            <div className="flex justify-center mt-[30px]">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" style={{ margin: '0' }}>
-                                    {articles.filter((element) => element.title && element.description && element.urlToImage).map((element) => (
-                                        <div className="bg-black rounded-lg shadow-lg p-4 flex flex-col" key={element.url}>
-                                            <NewsItem
-                                                title={element.title ? element.title : ""}
-                                                description={element.description ? element.description : ""}
-                                                imageUrl={element.urlToImage}
-                                                newsUrl={element.url}
-                                                author={element.author}
-                                                date={element.publishedAt}
-                                                source={element.source.name}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                {articles && articles.length > 0 ? (
+                                    articles
+                                        .filter((element) => element.title && element.description && element.urlToImage)
+                                        .map((element) => (
+                                            <div className="bg-black rounded-lg shadow-lg p-4 flex flex-col" key={element.url}>
+                                                <NewsItem
+                                                    title={element.title}
+                                                    description={element.description}
+                                                    imageUrl={element.urlToImage}
+                                                    newsUrl={element.url}
+                                                    author={element.author}
+                                                    date={element.publishedAt}
+                                                    source={element.source.name}
+                                                />
+                                            </div>
+                                        ))
+                                ) : (
+                                    <p>No articles available</p>
+                                )}
                             </div>
+
 
                             <div className="flex justify-center items-center my-6">
                                 {/* <button
