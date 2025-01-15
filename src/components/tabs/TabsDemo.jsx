@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Tabs } from "./Tabs";
-import WeatherContent from "../weather/WeatherContext";
+import WeatherContext from "../weather/WeatherContext";
 import NewsContext from "../news/NewsContext";
 import StockContext from "../stock/StockContext";
 import GitHubData from "../github/GitHubData";
@@ -35,7 +35,7 @@ export function TabsDemo() {
       value: "product",
       content: (
         <div className="w-full relative h-full rounded-2xl p-3 text-xl md:text-4xl font-bold text-white bg-black">
-          <WeatherContent />
+          <WeatherContext />
         </div>
       ),
     },
