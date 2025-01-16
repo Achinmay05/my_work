@@ -178,8 +178,55 @@ export default function WeatherContext() {
         }
     };
 
-    const requestLocationPermission = () => {
-        getCurrentLocation();
+    const requestLocationPermission = async () => {
+        try {
+            // First check if the browser supports the Permissions API
+            if (navigator.permissions && navigator.permissions.query) {
+                const result = await navigator.permissions.query({ name: 'geolocation' });
+                
+                if (result.state === 'granted') {
+                    getCurrentLocation();
+                } else if (result.state === 'prompt') {
+                    // This will trigger the native Android permission dialog
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const { latitude: lat, longitude: lon } = position.coords;
+                            setLocation({ lat, lon });
+                            setLocationPermission("granted");
+                            
+                            // Fetch all data after permission is granted
+                            Promise.all([
+                                fetchWeather(lat, lon),
+                                fetchAirPollutionData(lat, lon),
+                                fetchReverseGeocode(lat, lon)
+                            ]);
+                        },
+                        (error) => {
+                            console.error("Geolocation error:", error);
+                            if (error.code === 1) {
+                                setLocationPermission("denied");
+                                alert("Please enable location access in your device settings to use this feature.");
+                            } else {
+                                alert("Error getting location. Please try again.");
+                            }
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    alert("Location permission denied. Please enable it in your device settings.");
+                }
+            } else {
+                // Fallback for browsers that don't support the Permissions API
+                getCurrentLocation();
+            }
+        } catch (error) {
+            console.error("Permission error:", error);
+            alert("Error requesting location permission. Please try again.");
+        }
     };
 
     const throughCity = async () => {
@@ -226,7 +273,7 @@ export default function WeatherContext() {
                     />
                     <div onClick={throughCity} className='cursor-pointer pt-2 pb-2 font-extrabold pl-3 pr-3 text-sm border hover:shadow-lg hover:shadow-white border-white rounded-lg hover:bg-white hover:text-black hover:font-bold'>SEARCH</div>
                 </div>
-                <div onClick={getCurrentLocation} className='cursor-pointer p-2 mt-2 flex items-center justify-center w-full text-sm border hover:shadow-lg hover:shadow-white border-white rounded-lg hover:bg-white hover:text-black hover:font-bold'>CURRENT LOCATION</div>
+                <div onClick={requestLocationPermission} className='cursor-pointer p-2 mt-2 flex items-center justify-center w-full text-sm border hover:shadow-lg hover:shadow-white border-white rounded-lg hover:bg-white hover:text-black hover:font-bold'>CURRENT LOCATION</div>
                 <div className='w-full h-[20px]'></div>
                 <div className='w-full h-[200px] relative rounded'>
                     <div className='w-full h-full bg-gray-500 absolute opacity-40 rounded'></div>
